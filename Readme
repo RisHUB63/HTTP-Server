@@ -1,43 +1,46 @@
-[Client] → DNS → TCP Handshake → HTTP Request → Load Balancer → Web Server → App Server → Database → App Server → Web Server → Load Balancer → HTTP Response → [Client]
+# HTTP Request Flow: From Client to Server and Back
+
+This document explains the complete journey of an HTTP request through various system components.
+
+## Architecture Overview
+[Client] → DNS → TCP Handshake → HTTP Request → Load Balancer → Web Server → App Server →
+Database → App Server → Web Server → Load Balancer → HTTP Response → [Client]
 
 
-There are multiple thing in the HTTP server, and each one will be come after another
+## HTTP Server Components
 
-Network Layer
-    Listen on the particular port
-        HTTP: 80
-        HTTPS: 443
-    Handle TCP/IP
-    Manage the socket connection
+### Network Layer
+- **Port Listening**:
+  - HTTP: 80
+  - HTTPS: 443
+- **Protocol Handling**:
+  - Manages TCP/IP connections
+  - Handles socket management
 
+### Request Parser
+Extracts:
+- HTTP Method: [POST, PUT, GET, DELETE, OPTIONS, PATCH]
+- URI
+- Headers
+- Body
+- Query Parameters
 
-Request Parser
-    Parser the incoming request and extract the data
-    Extract:
-        Method [POST, PUT, GET, DELETE, OPTIONS, PATCH]
-        URI
-        Header
-        Body
-        Query Parameter
-    
-Routing Mechanism
-    It can be the static URL or RESTful API(s)
+### Routing Mechanism
+- Static URL routing
+- RESTful API routing
 
-Reponse
-    Status code
-    Response Body 
-        Sucess 
-        Failure
+### Response Generator
+- Status codes
+- Response Body:
+  - Success
+  - Failure
 
-Concurrency
-    Multi threading and all
+### Concurrency Model
+- Multi-threading
+- Connection pooling
 
-
-
-
-
-PASTE THIS OVER THE mermaidchart
-
+## Sequence Diagram
+```mermaid
 sequenceDiagram
     participant Client
     participant DNS
@@ -63,13 +66,41 @@ sequenceDiagram
     LB->>App: FIN
     App->>LB: ACK
     LB->>Client: ACK
+```
 
+## HTTP Request Flow
 
-
-
-Through out knowledge
-Client Make a request --->  DNS (Domain name system)    ---->    TCP Connection     ---->   (Application) Load Balancer ---->   Create a TCP connection b/w client and server   ----> Redirect to application
-www.xyz.com           --->  www.xyz.com :: 13.224.158.186                           ---->   Any Algorithms                      3 way handshake                                       Compute and return the data
-Address of website          Location of ALB/API Gateway                                                                                                                                         |
-Get the response      <----                            <----                        <----   Get the response and        <----   Get the response from the application                     <-----
-                                                                                            return to the laod Balancer
+```text
+1. Client Request
+   │
+   ▼
+2. DNS Resolution
+   │  www.xyz.com → 13.224.158.186 (Load Balancer IP)
+   │
+   ▼
+3. TCP 3-Way Handshake
+   │  Client              Load Balancer
+   │    │───SYN───────▶│
+   │    │◀──SYN-ACK───│
+   │    │───ACK───────▶│
+   │
+   ▼
+4. Load Balancer Processing
+   │  • Health checks
+   │  • Routing algorithm
+   │  • Backend selection
+   │
+   ▼
+5. Application Processing
+   │  • New TCP connection
+   │  • Request forwarding
+   │  • Business logic
+   │  • Database queries
+   │
+   ▼
+6. Response Return
+   │  App Server → Load Balancer → Client
+   │
+   ▼
+7. Connection Termination
+   │  (If keep-alive=false)
