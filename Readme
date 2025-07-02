@@ -1,0 +1,75 @@
+[Client] → DNS → TCP Handshake → HTTP Request → Load Balancer → Web Server → App Server → Database → App Server → Web Server → Load Balancer → HTTP Response → [Client]
+
+
+There are multiple thing in the HTTP server, and each one will be come after another
+
+Network Layer
+    Listen on the particular port
+        HTTP: 80
+        HTTPS: 443
+    Handle TCP/IP
+    Manage the socket connection
+
+
+Request Parser
+    Parser the incoming request and extract the data
+    Extract:
+        Method [POST, PUT, GET, DELETE, OPTIONS, PATCH]
+        URI
+        Header
+        Body
+        Query Parameter
+    
+Routing Mechanism
+    It can be the static URL or RESTful API(s)
+
+Reponse
+    Status code
+    Response Body 
+        Sucess 
+        Failure
+
+Concurrency
+    Multi threading and all
+
+
+
+
+
+PASTE THIS OVER THE mermaidchart
+
+sequenceDiagram
+    participant Client
+    participant DNS
+    participant LB as Load Balancer
+    participant App as Application Server
+
+    Client->>DNS: Query "www.xyz.com"
+    DNS-->>Client: Returns LB IP (e.g., 203.0.113.42)
+    
+    Note right of Client: TCP 3-Way Handshake
+    Client->>LB: SYN (Seq=100)
+    LB-->>Client: SYN-ACK (Seq=300, Ack=101)
+    Client->>LB: ACK (Seq=101, Ack=301)
+    
+    Note right of Client: HTTP Request
+    Client->>LB: GET /user/v1/list HTTP/1.1
+    LB->>App: New TCP handshake → Forward request
+    App->>LB: HTTP/1.1 200 OK (with data)
+    LB->>Client: Forward response
+    
+    Note right of Client: Connection teardown (if keep-alive=false)
+    Client->>LB: FIN
+    LB->>App: FIN
+    App->>LB: ACK
+    LB->>Client: ACK
+
+
+
+
+Through out knowledge
+Client Make a request --->  DNS (Domain name system)    ---->    TCP Connection     ---->   (Application) Load Balancer ---->   Create a TCP connection b/w client and server   ----> Redirect to application
+www.xyz.com           --->  www.xyz.com :: 13.224.158.186                           ---->   Any Algorithms                      3 way handshake                                       Compute and return the data
+Address of website          Location of ALB/API Gateway                                                                                                                                         |
+Get the response      <----                            <----                        <----   Get the response and        <----   Get the response from the application                     <-----
+                                                                                            return to the laod Balancer
